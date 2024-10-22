@@ -9,16 +9,16 @@ import { config } from "dotenv";
 const prisma = new PrismaClient();
 config();
 
-const JWT_KEY = process.env.SECRET_KEY
-if(!JWT_KEY){
-    logger.error("Key for JWT Auth not setup")
-    process.exit(1)
+const JWT_KEY = process.env.SECRET_KEY;
+if (!JWT_KEY) {
+  logger.error("Key for JWT Auth not setup");
+  process.exit(1);
 }
 
-export const createUser = async ( req: Request, res: Response ) => {
+export const createUser = async (req: Request, res: Response) => {
   const reqBody = req.body;
   const { success, error } = createUserSchema.safeParse(reqBody);
-  
+
   if (!success) {
     logger.warn("Invalid inputs while creating user", { errors: error });
     return res.status(400).json({
@@ -42,15 +42,18 @@ export const createUser = async ( req: Request, res: Response ) => {
 
     logger.info(`User ${user.userName} was created`);
 
-    const token = sign({
+    const token = sign(
+      {
         userName: user.userName,
         firstName: user.firstName,
         lastName: user.lastName,
-    }, JWT_KEY)
+      },
+      JWT_KEY,
+    );
 
     return res.status(201).json({
       msg: "User created successfully",
-      token
+      token,
     });
   } catch (error) {
     logger.error("Error creating user", { error });
@@ -61,42 +64,44 @@ export const createUser = async ( req: Request, res: Response ) => {
 };
 
 export const findUserByID = async (req: Request, res: Response) => {
-    const userId = req.params.id;
+  const userId = req.params.id;
 
-    const parsedId = parseInt(userId);
+  const parsedId = parseInt(userId);
 
-    if (isNaN(parsedId) || parsedId <= 0) {
-        logger.warn("Invalid ID access requested")
-        return res.status(400).json({ 
-            error: "Invalid ID provided. It must be a positive integer." }
-        );
+  if (isNaN(parsedId) || parsedId <= 0) {
+    logger.warn("Invalid ID access requested");
+    return res.status(400).json({
+      error: "Invalid ID provided. It must be a positive integer.",
+    });
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        id: parsedId,
+      },
+    });
+
+    if (!user) {
+      logger.warn("Tried to find a user which doesn't exist");
+      return res.json({
+        msg: "User does not exist",
+      });
     }
 
-    try{
-        const user = await prisma.user.findUnique({
-            where: {
-                id: parsedId
-            }
-        })
+    logger.info(
+      `Successful Search for name:${user.userName} id:${user.id} was made`,
+    );
 
-        if(!user){
-            logger.warn("Tried to find a user which doesn't exist")
-            return res.json({
-                msg: "User does not exist"
-            })
-        }
-
-        logger.info(`Successful Search for name:${user.userName} id:${user.id} was made`)
-
-        return res.json({
-            firstName: user.firstName,
-            lastName: user.lastName,
-            userName: user.userName
-        })
-    }catch(error){
-        logger.error("Error finding user by ID", { error });
-        return res.status(500).json({
-          msg: "Internal server error",
-        });
-    }
+    return res.json({
+      firstName: user.firstName,
+      lastName: user.lastName,
+      userName: user.userName,
+    });
+  } catch (error) {
+    logger.error("Error finding user by ID", { error });
+    return res.status(500).json({
+      msg: "Internal server error",
+    });
+  }
 };

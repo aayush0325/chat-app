@@ -1,4 +1,4 @@
-import { Router, Request, Response, Application } from "express";
+import { Router, Request, Response } from "express";
 import logger from "../logger";
 
 import { createUser } from "../controllers/user.controller";
@@ -14,7 +14,7 @@ userRouter.get("/", (req: Request, res: Response) => {
 });
 
 // Route to create user
-userRouter.post("/create", createUser as any)
+userRouter.post("/create", createUser as any);
 
 //Route to find user by ID
-userRouter.get("/read/:userId", findUserByID as any)
+userRouter.get("/read/:userId", findUserByID as any);
