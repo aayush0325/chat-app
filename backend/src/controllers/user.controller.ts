@@ -28,6 +28,21 @@ export const createUser = async (req: Request, res: Response) => {
   }
 
   try {
+    const existingUser = await prisma.user.findUnique({
+      where: {
+        userName: reqBody.userName,
+      },
+    });
+
+    if (existingUser) {
+      logger.warn("Attempt to create user failed: Username already exists", {
+        userName: reqBody.userName,
+      });
+      return res.status(400).json({
+        msg: "Username already exists",
+      });
+    }
+
     const hashedPassword = await hash(reqBody.password, 10);
     const dbData = {
       firstName: reqBody.firstName,
@@ -84,7 +99,7 @@ export const findUserByID = async (req: Request, res: Response) => {
 
     if (!user) {
       logger.warn("Tried to find a user which doesn't exist");
-      return res.json({
+      return res.status(404).json({
         msg: "User does not exist",
       });
     }
@@ -94,6 +109,7 @@ export const findUserByID = async (req: Request, res: Response) => {
     );
 
     return res.json({
+      msg: "User found",
       firstName: user.firstName,
       lastName: user.lastName,
       userName: user.userName,

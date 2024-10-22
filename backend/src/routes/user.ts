@@ -4,6 +4,8 @@ import logger from "../logger";
 import { createUser } from "../controllers/user.controller";
 import { findUserByID } from "../controllers/user.controller";
 
+import { authMiddleware } from "../middlewares/auth";
+
 export const userRouter = Router();
 
 userRouter.get("/", (req: Request, res: Response) => {
@@ -17,4 +19,4 @@ userRouter.get("/", (req: Request, res: Response) => {
 userRouter.post("/create", createUser as any);
 
 //Route to find user by ID
-userRouter.get("/read/:userId", findUserByID as any);
+userRouter.get("/read/:userId", authMiddleware as any, findUserByID as any);

@@ -8,3 +8,6 @@ CREATE TABLE "user" (
 
     CONSTRAINT "user_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_userName_key" ON "user"("userName");
