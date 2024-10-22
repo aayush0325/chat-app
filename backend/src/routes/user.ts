@@ -1,9 +1,10 @@
-import { Router, Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
+import { Router, Request, Response, Application } from "express";
 import logger from "../logger";
 
+import { createUser } from "../controllers/user.controller";
+import { findUserByID } from "../controllers/user.controller";
+
 export const userRouter = Router();
-const prisma = new PrismaClient();
 
 userRouter.get("/", (req: Request, res: Response) => {
   logger.info("Health check on user router");
@@ -11,3 +12,9 @@ userRouter.get("/", (req: Request, res: Response) => {
     msg: "healthy",
   });
 });
+
+// Route to create user
+userRouter.post("/create", createUser as any)
+
+//Route to find user by ID
+userRouter.get("/read/:userId", findUserByID as any)
