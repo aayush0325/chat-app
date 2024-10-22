@@ -5,4 +5,5 @@ export const createUserSchema = zod.object({
   firstName: zod.string().min(2),
   lastName: zod.string().min(2),
   password: zod.string().min(6),
+  email: zod.string().email(),
 });

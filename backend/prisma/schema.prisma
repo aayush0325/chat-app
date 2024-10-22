@@ -19,4 +19,10 @@ model user{
   firstName String
   lastName String
   password String
+  email String @unique
+  isVerified Boolean @default(false)
+  verificationCode String?
+  verificationExpires DateTime?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
